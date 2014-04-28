@@ -1,4 +1,3 @@
-super-awesome-paste
-===================
+## Super-Awesome Paste
 
-Super-Awesome Paste
+Intelligent paste handling for Sublime.

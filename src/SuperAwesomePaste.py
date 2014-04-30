@@ -3,6 +3,7 @@
 
 import sublime, sublime_plugin
 import re
+import html
 
 class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
     def run(self, edit):
@@ -62,6 +63,18 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
             return string
 
+        def html_escape(string):
+            body = get_file_content()
+            preceding_text = body[:self.view.sel()[0].begin()]
+
+            # When pasting in a content tag and no tags are present in the paste content
+            if (re.search(r'<(p|span|em|strong|small|td).*?>[^<>]*$', preceding_text)
+                and not re.search(r'<>', body)):
+                # Replace special characters with their HTML entity
+                string = html.escape(string)
+
+            return string
+
         # Assign clipboard contents to paste_content
         paste_content = sublime.get_clipboard().strip()
 
@@ -69,6 +82,7 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         paste_content = strip_line_numbers(paste_content)
         paste_content = normalise_line_endings(paste_content)
         paste_content = split_or_merge_lines(paste_content)
+        paste_content = html_escape(paste_content)
 
         # Make this command a single edit to undo
         self.edit = edit
@@ -76,5 +90,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         for region in self.view.sel():
             # Insert final clipboard content into currently selected regions
             self.view.replace(edit, region, paste_content)
-            self.view.run_command('reindent', {'single_line': False})
+            # Reindent selected regions if pasted content spans multiple lines
+            if re.search('\n', paste_content):
+                self.view.run_command('reindent', {'single_line': False})
+            # Move caret to the right
             self.view.run_command('move', {'by': 'characters', 'forward': True})

@@ -67,11 +67,12 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
             body = get_file_content()
             preceding_text = body[:self.view.sel()[0].begin()]
 
-            # When pasting in a content tag and no tags are present in the paste content
-            if (re.search(r'<(p|span|em|strong|small|td).*?>[^<>]*$', preceding_text)
-                and not re.search(r'<>', body)):
-                # Replace special characters with their HTML entity
-                string = html.escape(string)
+            # When pasting inside a content element
+            if re.search(r'<(p|h[1-5]|span|em|strong|small|td)[^<>]*?>[^<>]*$', preceding_text):
+                # If there are no tags or existing escaped entities present in the paste content
+                if not re.search(r'[<>]|&[^\s]+;', string):
+                    # Replace special characters with their HTML entity
+                    string = html.escape(string)
 
             return string
 

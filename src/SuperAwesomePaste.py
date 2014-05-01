@@ -82,7 +82,9 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         paste_content = strip_line_numbers(paste_content)
         paste_content = normalise_line_endings(paste_content)
         paste_content = split_or_merge_lines(paste_content)
-        paste_content = html_escape(paste_content)
+
+        if self.view.settings().get('super_awesome_paste.escape_html'):
+            paste_content = html_escape(paste_content)
 
         # Make this command a single edit to undo
         self.edit = edit

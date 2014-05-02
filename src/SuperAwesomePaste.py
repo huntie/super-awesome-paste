@@ -8,12 +8,20 @@ import html
 class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
     def run(self, edit):
 
+        # Get current document contents
+        body = self.view.substr(sublime.Region(0, self.view.size()))
+        # Get content that precedes the selection
+        preceding_text = body[:self.view.sel()[0].begin()]
+
+        def get_clipboard_content():
+            if re.search('\n', sublime.get_clipboard()):
+                return sublime.get_clipboard().strip()
+            else:
+                return sublime.get_clipboard()
+
         def get_file_type():
             if isinstance(self.view.file_name(), str):
                 return self.view.file_name().split('.')[-1]
-
-        def get_file_content():
-            return self.view.substr(sublime.Region(0, self.view.size()));
 
         def strip_line_numbers(string):
             # If enough preceding line numbers are found (more than half of all lines)
@@ -32,9 +40,6 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
             return string
 
         def split_or_merge_lines(string):
-            body = get_file_content()
-            preceding_text = body[:self.view.sel()[0].begin()]
-
             # If there existing semicolon-separated lines on the page
             if len(re.findall(r';[ \t]*\n', body)) > 1:
                 # Split lines with multiple phrases by semicolons
@@ -64,9 +69,6 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
             return string
 
         def html_escape(string):
-            body = get_file_content()
-            preceding_text = body[:self.view.sel()[0].begin()]
-
             # When pasting inside a content element
             if re.search(r'<(p|h[1-5]|span|em|strong|small|td)[^<>]*?>[^<>]*$', preceding_text):
                 # If there are no tags or existing escaped entities present in the paste content
@@ -76,8 +78,30 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
             return string
 
+        def format_urls(string):
+            if re.search('.', string):
+                # Regex to match URLs adapted from Matthew O'Riordan <http://bit.ly/1mlEHm8>
+                url = re.compile(r'((([A-Za-z]{3,9}:(?:\/\/)?)'     # Match protocol
+                                    '([A-Za-z0-9\.\-]+)'            # domain
+                                    '|(?:www\.)'                    # OR www.
+                                    '[A-Za-z0-9\.\-]+)'             # domain
+                                    '((?:\/[\+~%\/\.\w\-_]*)'       # path
+                                    '?\??(?:[\-\+=&;%@\.\w_]*)'     # query string
+                                    '#?(?:[\.\!\/\\\w]*))?)')       # anchor
+
+                for this_url, start, protocol, domain, path in re.findall(url, string):
+                    if not protocol:
+                        if not (re.search(r'\/$', preceding_text) or re.search(r'^\/', string)):
+                            # Add a protocol to the start of the url if missing
+                            string = string.replace(this_url, 'http://' + this_url)
+                    if re.search(r'[A-Z]', this_url):
+                        # If any uppercase characters are found, make the URL lowercase
+                        string = string.replace(this_url, this_url.lower())
+
+            return string
+
         # Assign clipboard contents to paste_content
-        paste_content = sublime.get_clipboard().strip()
+        paste_content = get_clipboard_content()
 
         # Apply corrections to paste content
         paste_content = strip_line_numbers(paste_content)
@@ -86,6 +110,9 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
         if self.view.settings().get('super_awesome_paste.escape_html'):
             paste_content = html_escape(paste_content)
+
+        if self.view.settings().get('super_awesome_paste.format_urls'):
+            paste_content = format_urls(paste_content)
 
         # Make this command a single edit to undo
         self.edit = edit

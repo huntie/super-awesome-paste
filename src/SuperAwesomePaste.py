@@ -25,7 +25,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
         def strip_line_numbers(string):
             # If enough preceding line numbers are found (more than half of all lines)
-            if len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) / 2 - 2:
+            if (len(re.findall('\n', string)) > 2 and
+                len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) / 2 - 2):
                 # Remove line number from first line
                 string = re.sub(r'^[ \t]*\d+\:?[ \t]*\n?', '', string)
 
@@ -100,6 +101,13 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
             return string
 
+        def show_message(string):
+            if re.search('\n', string):
+                sublime.status_message('Pasted {} lines'.format(len(string.splitlines())))
+            else:
+                sublime.status_message('Pasted {n[0]} character{n[1]}'
+                    .format(n = [len(string), 's'] if len(string) != 1 else [1, '']))
+
         # Assign clipboard contents to paste_content
         paste_content = get_clipboard_content()
 
@@ -125,3 +133,6 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 self.view.run_command('reindent', {'single_line': False})
             # Move caret to the right
             self.view.run_command('move', {'by': 'characters', 'forward': True})
+
+        # Show status bar completion message
+        show_message(paste_content)

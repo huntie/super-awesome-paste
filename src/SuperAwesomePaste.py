@@ -14,10 +14,11 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         preceding_text = body[:self.view.sel()[0].begin()]
 
         def get_clipboard_content():
-            if re.search('\n', sublime.get_clipboard()):
-                return sublime.get_clipboard().strip()
+            clipboard = sublime.get_clipboard()
+            if re.search('\n', clipboard):
+                return clipboard.strip()
             else:
-                return sublime.get_clipboard()
+                return clipboard
 
         def get_file_type():
             if isinstance(self.view.file_name(), str):
@@ -104,6 +105,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         def show_message(string):
             if re.search('\n', string):
                 sublime.status_message('Pasted {} lines'.format(len(string.splitlines())))
+            elif len(string) == 0:
+                sublime.status_message('Nothing to paste')
             else:
                 sublime.status_message('Pasted {n[0]} character{n[1]}'
                     .format(n = [len(string), 's'] if len(string) != 1 else [1, '']))
@@ -111,28 +114,29 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         # Assign clipboard contents to paste_content
         paste_content = get_clipboard_content()
 
-        # Apply corrections to paste content
-        paste_content = strip_line_numbers(paste_content)
-        paste_content = normalise_line_endings(paste_content)
-        paste_content = split_or_merge_lines(paste_content)
+        if len(paste_content) > 0:
+            # Apply corrections to paste content
+            paste_content = strip_line_numbers(paste_content)
+            paste_content = normalise_line_endings(paste_content)
+            paste_content = split_or_merge_lines(paste_content)
 
-        if self.view.settings().get('super_awesome_paste.escape_html'):
-            paste_content = html_escape(paste_content)
+            if self.view.settings().get('super_awesome_paste.escape_html'):
+                paste_content = html_escape(paste_content)
 
-        if self.view.settings().get('super_awesome_paste.format_urls'):
-            paste_content = format_urls(paste_content)
+            if self.view.settings().get('super_awesome_paste.format_urls'):
+                paste_content = format_urls(paste_content)
 
-        # Make this command a single edit to undo
-        self.edit = edit
+            # Make this command a single edit to undo
+            self.edit = edit
 
-        for region in self.view.sel():
-            # Insert final clipboard content into currently selected regions
-            self.view.replace(edit, region, paste_content)
-            # Reindent selected regions if pasted content spans multiple lines
-            if re.search('\n', paste_content):
-                self.view.run_command('reindent', {'single_line': False})
-            # Move caret to the right
-            self.view.run_command('move', {'by': 'characters', 'forward': True})
+            for region in self.view.sel():
+                # Insert final clipboard content into currently selected regions
+                self.view.replace(edit, region, paste_content)
+                # Reindent selected regions if pasted content spans multiple lines
+                if re.search('\n', paste_content):
+                    self.view.run_command('reindent', {'single_line': False})
+                # Move caret to the right
+                self.view.run_command('move', {'by': 'characters', 'forward': True})
 
         # Show status bar completion message
         show_message(paste_content)

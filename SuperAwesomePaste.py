@@ -12,6 +12,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
         body = self.view.substr(sublime.Region(0, self.view.size()))
         # Get content that precedes the selection
         preceding_text = body[:self.view.sel()[0].begin()]
+        # Get current file type
+        file_type = self.view.file_name().split('.')[-1] if isinstance(self.view.file_name(), str) else ''
 
         def get_clipboard_content():
             clipboard = sublime.get_clipboard()
@@ -19,10 +21,6 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 return clipboard.strip()
             else:
                 return clipboard
-
-        def get_file_type():
-            if isinstance(self.view.file_name(), str):
-                return self.view.file_name().split('.')[-1]
 
         def strip_line_numbers(string):
             # If enough preceding line numbers are found (more than half of all lines)
@@ -67,6 +65,18 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 string = string.replace('\n', '\r\n')
             elif line_endings == 'mac':
                 string = string.replace('\n', '\r')
+
+            return string
+
+        def clean_formatting(string):
+            if re.search('•', string):
+                if re.search(r'md|markdown', file_type):
+                    # Convert bullet symbols to markdown list items
+                    string = re.sub(r'(^|\n)•\t? ?', '\n+ ', string)
+                else:
+                    # Strip bullet symbol when pasting in an HTML list item
+                    if re.search(r'<li[^<>]*?>[^<>]*$', preceding_text):
+                        string = re.sub(r'(^|\n)•\t? ?', '', string)
 
             return string
 
@@ -119,6 +129,7 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
             paste_content = strip_line_numbers(paste_content)
             paste_content = normalise_line_endings(paste_content)
             paste_content = split_or_merge_lines(paste_content)
+            paste_content = clean_formatting(paste_content)
 
             if self.view.settings().get('super_awesome_paste.escape_html'):
                 paste_content = html_escape(paste_content)

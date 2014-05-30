@@ -8,7 +8,7 @@ Super-Awesome Paste is at an early stage and currently supports the removal of c
 
 ### Getting started
 
-The plugin will soon be available through [Package Control](https://sublime.wbond.net/), but can also be installed manually by adding the [latest version](https://github.com/huntie/super-awesome-paste/releases) to your Sublime Text 3 packages directory. You should then open Sublime to find the command added to your context menu. By default, the `super_awesome_paste` command is bound to `Ctrl+Alt+V`, but you may want to change this to something more convenient or to override the regular paste shortcut.
+The plugin is now available through [Package Control](https://sublime.wbond.net/), but can also be installed manually by adding the [latest version](https://github.com/huntie/super-awesome-paste/releases) to your Sublime Text 3 packages directory. You should then open Sublime to find the command added to your context menu. By default, the `super_awesome_paste` command is bound to `Ctrl+Alt+V`, but you may want to change this to something more convenient or to override the regular paste shortcut.
 
 ### Options
 

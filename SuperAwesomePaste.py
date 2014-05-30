@@ -17,50 +17,19 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
         def get_clipboard_content():
             clipboard = sublime.get_clipboard()
-            if re.search('\n', clipboard):
-                return clipboard.strip()
-            else:
-                return clipboard
-
-        def strip_line_numbers(string):
-            # If enough preceding line numbers are found (more than half of all lines)
-            if (len(re.findall('\n', string)) > 2 and
-                len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) / 2 - 2):
-                # Remove line number from first line
-                string = re.sub(r'^[ \t]*\d+\:?[ \t]*\n?', '', string)
-
-                # If a preceding line number is found on every line
-                if len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) - 2:
-                    # Remove preceding numbers from subsequent lines
-                    string = re.sub(r'\n[ \t]*\d+\:?', '\n', string)
-                else:
-                    # Remove preceding numbers and extra lines from subsequent lines
-                    string = re.sub(r'\n[ \t]*\d+\:?', '', string)
-
-            return string
-
-        def split_or_merge_lines(string):
-            # If there existing semicolon-separated lines on the page
-            if len(re.findall(r';[ \t]*\n', body)) > 1:
-                # Split lines with multiple phrases by semicolons
-                string = re.sub(r';[ \t]*(\w)', r';\n\1', string)
-
-            # If the file content precedes with a quote
-            if re.search(r'[\'\"][ \t]*$', preceding_text):
-                # Merge lines separated by semicolons
-                string = re.sub(r';[ \t]*\n[ \t]*(\w)', r'; \1', string)
-
-            return string
+            return clipboard.strip() if re.search('\n', clipboard) else clipboard
 
         def normalise_line_endings(string):
-            line_endings = self.view.settings().get('default_line_ending')
-
-            # Reset line ending character
-            string = string.replace('\r\n', '\n').replace('\r', '\n')
+            # Reset line ending characters
+            string = re.sub(r'\r\n?', '\n', string)
             # Strip trailing whitespace
             string = re.sub(r'[ \t]*\n', '\n', string)
 
-            # Apply line endings of the current file
+            return string
+
+        def apply_line_endings(string):
+            line_endings = self.view.settings().get('default_line_ending')
+
             if line_endings == 'windows':
                 string = string.replace('\n', '\r\n')
             elif line_endings == 'mac':
@@ -80,9 +49,39 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
             return string
 
+        def strip_line_numbers(string):
+            # If enough preceding line numbers are found (more than half of all lines)
+            if (len(re.findall('\n', string)) > 2 and
+                len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) / 2 - 2):
+                # Remove line number from first line
+                string = re.sub(r'^[ \t]*\d+\:?[ \t]*\n?', '', string)
+
+                # If a preceding line number is found on every line
+                if len(re.findall(r'\n[ \t]*\d+\:?', string)) > len(string.splitlines()) - 2:
+                    # Remove preceding numbers from subsequent lines
+                    string = re.sub(r'\n[ \t]*\d+\:?', '\n', string)
+                else:
+                    # Remove preceding numbers and extra lines from subsequent lines
+                    string = re.sub(r'\n[ \t]*\d+\:?', '', string)
+
+            return string
+
+        def split_or_merge_lines(string):
+            # If there are enough existing semicolon-separated lines on the page
+            if len(re.findall(r';[ \t]*\n', body)) > len(body.splitlines()) / 4:
+                # Split lines with multiple phrases by semicolons
+                string = re.sub(r';[ \t]*(\w)', r';\n\1', string)
+
+            # If the file content precedes with a quote
+            if re.search(r'[\'\"][ \t]*$', preceding_text):
+                # Merge lines separated by semicolons
+                string = re.sub(r';\n[ \t]*(\w)', r'; \1', string)
+
+            return string
+
         def html_escape(string):
             # When pasting inside a content element
-            if re.search(r'<(p|h[1-5]|span|em|strong|small|td)[^<>]*?>[^<>]*$', preceding_text):
+            if re.search(r'<(p|h[1-6]|span|em|strong|small|td)[^<>]*?>[^<>]*$', preceding_text):
                 # If there are no tags or existing escaped entities present in the paste content
                 if not re.search(r'[<>]|&[^\s]+;', string):
                     # Replace special characters with their HTML entity
@@ -103,7 +102,7 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
                 for this_url, start, protocol, domain, path in re.findall(url, string):
                     if not protocol:
-                        if not (re.search(r'\/$', preceding_text) or re.search(r'^\/', string)):
+                        if not (re.search(r'\/$', preceding_text) or not re.search(r'^\/', this_url)):
                             # Add a protocol to the start of the url if missing
                             string = string.replace(this_url, 'http://' + this_url)
                     if re.search(r'[A-Z]', this_url):
@@ -126,8 +125,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
         if len(paste_content) > 0:
             # Apply corrections to paste content
-            paste_content = strip_line_numbers(paste_content)
             paste_content = normalise_line_endings(paste_content)
+            paste_content = strip_line_numbers(paste_content)
             paste_content = split_or_merge_lines(paste_content)
             paste_content = clean_formatting(paste_content)
 
@@ -136,6 +135,8 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
 
             if self.view.settings().get('super_awesome_paste.format_urls'):
                 paste_content = format_urls(paste_content)
+
+            paste_content = apply_line_endings(paste_content)
 
             # Make this command a single edit to undo
             self.edit = edit

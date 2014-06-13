@@ -94,8 +94,7 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 # Regex to match URLs adapted from Matthew O'Riordan <http://bit.ly/1mlEHm8>
                 url = re.compile(r'((([A-Za-z]{3,9}:(?:\/\/)?)'     # Match protocol
                                     '([A-Za-z0-9\.\-]+)'            # domain
-                                    '|(?:www\.)'                    # OR www.
-                                    '[A-Za-z0-9\.\-]+)'             # domain
+                                    '|(?:www\.)[A-Za-z0-9\.\-]+)'   # OR www.domain
                                     '((?:\/[\+~%\/\.\w\-_]*)'       # path
                                     '?\??(?:[\-\+=&;%@\.\w_]*)'     # query string
                                     '#?(?:[\.\!\/\\\w]*))?)')       # anchor
@@ -105,9 +104,9 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                         if not (re.search(r'\/$', preceding_text) or not re.search(r'^\/', this_url)):
                             # Add a protocol to the start of the url if missing
                             string = string.replace(this_url, 'http://' + this_url)
-                    if re.search(r'[A-Z]', this_url):
-                        # If any uppercase characters are found, make the URL lowercase
-                        string = string.replace(this_url, this_url.lower())
+                    if re.search(r'[A-Z]', start):
+                        # If any uppercase characters are found, make the domain lowercase
+                        string = string.replace(this_url, start.lower() + path)
 
             return string
 
@@ -147,8 +146,9 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 # Reindent selected regions if pasted content spans multiple lines
                 if re.search('\n', paste_content):
                     self.view.run_command('reindent', {'single_line': False})
-                # Move caret to the right
-                self.view.run_command('move', {'by': 'characters', 'forward': True})
+
+            # Move caret to the right
+            self.view.run_command('move', {'by': 'characters', 'forward': True})
 
         # Show status bar completion message
         show_message(paste_content)

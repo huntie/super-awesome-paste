@@ -1,0 +1,12 @@
+==========================================
+Thanks for installing Super-Awesome Paste!
+==========================================
+
+You should find the new command added to your context menu, though you may want to bind
+"super_awesome_paste" to replace your default keyboard shortcut, or to one of your choosing.
+If you wish to configure other options, please restart Sublime for changes to take effect.
+
+More starting information and options:
+https://github.com/huntie/super-awesome-paste#getting-started
+
+Happy coding!

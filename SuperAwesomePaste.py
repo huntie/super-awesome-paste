@@ -144,7 +144,7 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
                 # Insert final clipboard content into currently selected regions
                 self.view.replace(edit, region, paste_content)
                 # Reindent selected regions if pasted content spans multiple lines
-                if re.search('\n', paste_content):
+                if re.search('\n', paste_content) and file_type:
                     self.view.run_command('reindent', {'single_line': False})
 
             # Move caret to the right

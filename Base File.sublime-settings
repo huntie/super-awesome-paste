@@ -1,4 +1,5 @@
 {
     "super_awesome_paste.escape_html": true,
-    "super_awesome_paste.format_urls": true
+    "super_awesome_paste.format_urls": true,
+    "super_awesome_paste.format_hex_colors": "lowercase"
 }

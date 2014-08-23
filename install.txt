@@ -1,12 +1,22 @@
-==========================================
-Thanks for installing Super-Awesome Paste!
-==========================================
 
-You should find the new command added to your context menu, though you may want to bind
-"super_awesome_paste" to replace your default keyboard shortcut, or to one of your choosing.
-If you wish to configure other options, please restart Sublime for changes to take effect.
 
-More starting information and options:
-https://github.com/huntie/super-awesome-paste#getting-started
+                    ===========================================================
+                            Thanks for installing Super-Awesome Paste!
+                    ===========================================================
+
+
+You should find a shiny new entry in your context menu, although you may wish to bind the command
+"super_awesome_paste" to something more convenient by heading to Preferences -> Key Bindings - User.
+
+Most pastes will not appear modified, by try copying something from a different indentation level
+or into a particular file context and you might find yourself pleasantly surprised with the results.
+There are currently a limited number of user options available and if you wish to modify any of
+these please note that you should restart Sublime for changes to take effect.
+
+>   Further starting information and options:
+    https://github.com/huntie/super-awesome-paste#getting-started
+
+>   Submit issues and feature requests:
+    https://github.com/huntie/super-awesome-paste/issues
 
 Happy coding!

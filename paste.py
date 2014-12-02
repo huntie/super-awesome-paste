@@ -1,7 +1,7 @@
 import sublime
 import html
 import re
-from SuperAwesomePaste.util import RegexPatterns
+from .util import RegexPatterns
 
 class Paste:
     def __init__(self, view, file_info, preferences):

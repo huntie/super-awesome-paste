@@ -25,8 +25,8 @@ SOFTWARE.
 
 import sublime
 import sublime_plugin
-from SuperAwesomePaste.util import FileInfo, Preferences
-from SuperAwesomePaste.paste import Paste
+from .util import FileInfo, Preferences
+from .paste import Paste
 
 class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
     def run(self, edit):

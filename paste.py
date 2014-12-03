@@ -45,7 +45,13 @@ class Paste:
     def clean_formatting(self):
         # Strip bullet symbol when pasting in an HTML list item
         if re.search(r'<li[^<>]*?>[^<>]*$', self.file.get_contents_before()):
-            string = re.sub(r'(^|\n)•\t? ?', '', string)
+            self.text = re.sub(r'(^|\n)•\t? ?', '', self.text)
+
+        if (not re.search(r'txt|md|markdown', self.file.get_file_type()) and
+            self.file.is_type_defined()):
+            # Normalise any found smart quotes
+            self.text = re.sub(r'[‘’]', '\'', self.text)
+            self.text = re.sub(r'[“”]', '"', self.text)
 
     def markdown_formatting(self):
         if re.search(r'md|markdown', self.file.get_file_type()):

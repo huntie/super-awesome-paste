@@ -12,7 +12,7 @@ class FileInfo:
     def get_file_type(self):
         return self.file_type.lower()
 
-    def is_type_defined():
+    def is_type_defined(self):
         return len(self.file_type) > 0
 
     def get_contents(self):

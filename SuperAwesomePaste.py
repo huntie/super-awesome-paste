@@ -48,10 +48,9 @@ class SuperAwesomePasteCommand(sublime_plugin.TextCommand):
             if preferences.get_option('escape_html'):
                 paste.html_escape()
 
-            if preferences.get_option('format_urls'):
-                paste.format_urls()
+            if preferences.get_option('format_hex_colors'):
+                paste.format_hex_colors()
 
-            paste.format_hex_colors()
             paste.apply_line_endings()
 
             for region in self.view.sel():

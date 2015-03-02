@@ -15,6 +15,15 @@ class FileInfo:
     def is_type_defined(self):
         return len(self.file_type) > 0
 
+    def is_markdown(self):
+        return re.search(r'^md|markdown$', self.file_type)
+
+    def is_txt_or_md(self):
+        return re.search(r'^txt|md|markdown$', self.file_type)
+
+    def is_stylesheet(self):
+        return re.search(r'^css|less|scss|sass$', self.file_type)
+
     def get_contents(self):
         return self.contents
 
@@ -33,16 +42,8 @@ class Preferences:
         return self.settings.get('super_awesome_paste.' + key)
 
 class RegexPatterns:
-    # Match a hex colour code of the form #AAAAAA or #AAA
-    hex_color = re.compile(r'^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$')
-
-    # Match a web URL - adapted from Matthew O'Riordan (http://bit.ly/1mlEHm8)
-    url = re.compile(r'((([A-Za-z]{3,9}:(?:\/\/)?)'     # protocol
-                        '([A-Za-z0-9\.\-]+)'            # domain
-                        '|(?:www\.)[A-Za-z0-9\.\-]+)'   # or 'www.domain'
-                        '((?:\/[\+~%\/\.\w\-_]*)'       # path
-                        '?\??(?:[\-\+=&;%@\.\w_]*)'     # query string
-                        '#?(?:[\.\!\/\\\w]*))?)')       # anchor
+    # Match a hex colour code of the form #aaaaaa or #aaa
+    hex_color = re.compile(r'^#?((?:[A-Fa-f0-9]{2}){3}|[A-Fa-f0-9]{3})$')
 
     # Match a preceding section back to and including an opening HTML inline content tag such as
     # <h1> or <strong>

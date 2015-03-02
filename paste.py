@@ -8,7 +8,6 @@ class Paste:
         self.view = view
         self.file = file_info
         self.preferences = preferences
-        self.patterns = RegexPatterns()
 
         # Load current text from clipboard, clear if empty
         self.text = sublime.get_clipboard()
@@ -47,14 +46,13 @@ class Paste:
         if re.search(r'<li[^<>]*?>[^<>]*$', self.file.get_contents_before()):
             self.text = re.sub(r'(^|\n)•\t? ?', '', self.text)
 
-        if (not re.search(r'txt|md|markdown', self.file.get_file_type()) and
-            self.file.is_type_defined()):
+        if not self.file.is_txt_or_md() and self.file.is_type_defined():
             # Normalise any found smart quotes
             self.text = re.sub(r'[‘’]', '\'', self.text)
             self.text = re.sub(r'[“”]', '"', self.text)
 
     def markdown_formatting(self):
-        if re.search(r'md|markdown', self.file.get_file_type()):
+        if self.file.is_markdown():
             # Convert bullet symbols to markdown list items
             self.text = re.sub(r'(^|\n)•\t? ?', '\n+ ', self.text)
 
@@ -84,36 +82,27 @@ class Paste:
             self.text = re.sub(r';\n[ \t]*(\w)', r'; \1', self.text)
 
     def html_escape(self):
-        if re.search(self.patterns.html_opening_content_tag, self.file.get_contents_before()):
+        if re.search(RegexPatterns.html_opening_content_tag, self.file.get_contents_before()):
             # If there are no tags or existing escaped entities present in the paste content,
             # replace special characters with their HTML entity
             if not re.search(r'[<>]|&[^\s]+;', self.text):
                 self.text = html.escape(self.text)
 
-    def format_urls(self):
-        if re.search(self.patterns.url, self.text):
-            # For each found URL, apply tranformations to its parts if necessary
-            for _url, start, protocol, domain, path in re.findall(self.patterns.url, self.text):
-                if (not protocol and
-                    not re.search(r'\/$', self.file.get_contents_before()) or
-                    not re.search(r'^\/', _url)):
-                    # Add a protocol to the start of the url if missing
-                    self.text = self.text.replace(_url, 'http://' + _url)
-                # Ensure the domain part is lowercase
-                self.text = self.text.replace(_url, start.lower() + path)
-
     def format_hex_colors(self):
-        if re.match(self.patterns.hex_color, self.text):
-            # If paste content matches a hex triplet, remove or add a preceding hash depending on its
-            # presence in the file and the file type
+        if re.match(RegexPatterns.hex_color, self.text):
+            # If paste content matches a hex triplet, remove or add a preceding hash as needed
             if re.search(r'#$', self.file.get_contents_before()):
                 self.text = self.text.replace('#', '')
             elif not '#' in self.text:
-                if re.search(r'^css|less|scss|sass$', self.file.get_file_type()):
+                if self.file.is_stylesheet():
                     self.text = '#' + self.text
 
             # Convert to preferred case
             if self.preferences.get_option('format_hex_colors') == 'lowercase':
                 self.text = self.text.lower()
-            else:
+            elif self.preferences.get_option('format_hex_colors') == 'uppercase':
                 self.text = self.text.upper()
+
+            # If possible, shorten to a three digit colour code
+            if self.file.is_stylesheet():
+                self.text = re.sub(r'(\w)\1(\w)\2(\w)\3', r'\1\2\3', self.text)

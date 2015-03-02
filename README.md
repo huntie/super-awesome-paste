@@ -1,14 +1,10 @@
 # Super-Awesome Paste
 
-*A Sublime Text plugin that tidies up and contextually formats pasted content.*
-
-Super-Awesome Paste aims to intelligently integrate copied text into your code, and currently normalises line endings and whitespace, removes copied line numbers & extra formatting and automatically indents the result. In addition, fixes such as URL tidying and HTML character escaping are applied depending on the paste context. More features are planned soon, and you can read more about the project in this [blog post](//hunt.ghost.io/improving-paste-formatting-in-sublime-text/).
-
-**Requirements:** Sublime Text 3
+Super-Awesome Paste is a Sublime Text 3 plugin which aims to intelligently integrate copied text into your code. Currently this includes normalising line endings and whitespace, auto-indentation, and cleaning up copied line numbers and unwanted formatting, including smart quotes. In addition, small contextual fixes such as HTML character escaping and hex colour formatting are applied when needed. Hopefully this plugin will save developers many keystrokes, and more features are always on the way.
 
 ## Getting started
 
-The plugin is now available through [Package Control](//sublime.wbond.net/packages/Super-Awesome%20Paste), but can also be installed manually by adding the [latest version](//github.com/huntie/super-awesome-paste/releases) to your Sublime Text 3 packages directory. You should then open Sublime to find the command added to your context menu. By default, the `super_awesome_paste` command is bound to `Ctrl+Alt+V`, but you may want to change this to something more convenient or to override the regular paste shortcut.
+The plugin is available through [Package Control](//sublime.wbond.net/packages/Super-Awesome%20Paste), but can also be installed manually by adding the [latest version](//github.com/huntie/super-awesome-paste/releases) to your Sublime Text 3 packages directory. By default, the `super_awesome_paste` command can be found in your context menu and is bound to `Ctrl+Alt+V`, but you may want to change this to something more convenient or to override the regular paste shortcut.
 
 ## Options
 
@@ -16,18 +12,21 @@ These options can be appended to your `Settings - User` file and are prefixed wi
 
 ```json
 {
-    "super_awesome_paste.format_urls": true
+    "super_awesome_paste.escape_html": true
 }
 ```
 
 **escape_html**  
-If set to `true` certain special characters are converted to their equivalent HTML entities when pasted into markup.
+Type: `Boolean`  
+Default: `true`
 
-**format_urls**  
-If set to `true` tidies up URLs by adding an HTTP protocol and converting to lowercase when needed.
+Convert certain special characters to their escaped HTML entities when pasted into a content tag within an HTML page.
 
 **format_hex_colors**  
-Normalise capitalisation of hex colour triplets to `"uppercase"` or `"lowercase"`.
+Type: `String`  
+Default: `"lowercase"`
+
+Specify preferred capitalisation for pasted hex colours - `"lowercase"` or `"uppercase"`. Set `false` to disable.
 
 ## Contributing
 

@@ -81,12 +81,8 @@ class Paste:
             # If the file content precedes with a quote, merge lines separated by semicolons
             self.text = re.sub(r';\n[ \t]*(\w)', r'; \1', self.text)
 
-    def html_escape(self):
-        if re.search(RegexPatterns.html_opening_content_tag, self.file.get_contents_before()):
-            # If there are no tags or existing escaped entities present in the paste content,
-            # replace special characters with their HTML entity
-            if not re.search(r'[<>]|&[^\s]+;', self.text):
-                self.text = html.escape(self.text)
+    def html_encode(self):
+        self.text = html.escape(self.text)
 
     def format_hex_colors(self):
         if re.match(RegexPatterns.hex_color, self.text):

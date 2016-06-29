@@ -12,18 +12,12 @@ These options can be appended to your `Settings - User` file and are prefixed wi
 
 ```json
 {
-    "super_awesome_paste.escape_html": true
+    "super_awesome_paste.format_hex_colors": "uppercase"
 }
 ```
 
-**escape_html**  
-Type: `Boolean`  
-Default: `true`
-
-Convert certain special characters to their escaped HTML entities when pasted into a content tag within an HTML page.
-
-**format_hex_colors**  
-Type: `String`  
+**format_hex_colors**
+Type: `String`
 Default: `"lowercase"`
 
 Specify preferred capitalisation for pasted hex colours - `"lowercase"` or `"uppercase"`. Set `false` to disable.

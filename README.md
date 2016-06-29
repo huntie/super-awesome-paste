@@ -16,7 +16,7 @@ These options can be appended to your `Settings - User` file and are prefixed wi
 }
 ```
 
-**format_hex_colors**
+**format_hex_colors**  
 Type: `String`
 Default: `"lowercase"`
 
